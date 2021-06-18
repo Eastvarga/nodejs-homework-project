@@ -2,7 +2,6 @@ const { connectMongo, getCollections } = require('../db/connection')
 const ObjectId = require('mongodb').ObjectId
 const path = require('path')
 const fs = require('fs/promises')
-const { ObjectID } = require('mongodb')
 const contactsPath = path.resolve('./model/contacts.json')
 
 const listContacts = async () => {
