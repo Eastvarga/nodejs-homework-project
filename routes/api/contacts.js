@@ -8,10 +8,13 @@ const {
   updateContact
 } = require('../../model/index')
 const Joi = require('joi')
-
+const {
+  addContactValidation
+} = require('../../middlewares/validationMiddlewares')
 router.get('/', async (req, res, next) => {
   try {
-    const contacts = await listContacts()
+    // console.log(req.db)
+    const contacts = await listContacts(req)
     res.status(200).json({ contacts })
   } catch (error) {
     console.error(error)
@@ -32,7 +35,7 @@ router.get('/:contactId', async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', addContactValidation, async (req, res, next) => {
   try {
     const schema = Joi.object({
       name: Joi.string().min(3).max(30).required(),
