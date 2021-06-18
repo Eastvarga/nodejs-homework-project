@@ -1,4 +1,10 @@
 const MongoClient = require('mongodb').MongoClient
+const collections = {}
+
+const getCollections = () => {
+  return collections
+}
+
 const connectMongo = async () => {
   const client = await MongoClient.connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -6,8 +12,7 @@ const connectMongo = async () => {
   })
   const db = client.db('db-contacts')
 
-  const Contacts = db.collection('contacts')
-  return { Contacts }
+  collections.Contacts = db.collection('contacts')
 }
 
-module.exports = { connectMongo }
+module.exports = { connectMongo, getCollections }
