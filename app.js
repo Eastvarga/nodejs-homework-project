@@ -4,6 +4,7 @@ const cors = require('cors')
 require('dotenv').config()
 
 const contactsRouter = require('./routes/api/contacts')
+const modelMiddleware = require('./middlewares/models')
 
 const app = express()
 
@@ -12,7 +13,7 @@ const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json())
-
+app.use(modelMiddleware)
 app.use('/api/contacts', contactsRouter)
 
 app.use((req, res) => {
