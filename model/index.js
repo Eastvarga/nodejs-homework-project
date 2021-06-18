@@ -1,11 +1,13 @@
+const { connectMongo } = require('../db/connection')
+
 const path = require('path')
 const fs = require('fs/promises')
 const contactsPath = path.resolve('./model/contacts.json')
 
 const listContacts = async () => {
   try {
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
+    const { Contacts } = await connectMongo()
+    const contacts = await Contacts.find({}).toArray()
     return contacts
   } catch (error) {
     console.error(error)
