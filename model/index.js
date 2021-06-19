@@ -1,8 +1,5 @@
-const { connectMongo, getCollections } = require('../db/connection')
+const { getCollections } = require('../db/connection')
 const ObjectId = require('mongodb').ObjectId
-const path = require('path')
-const fs = require('fs/promises')
-const contactsPath = path.resolve('./model/contacts.json')
 
 const listContacts = async () => {
   try {
@@ -32,17 +29,10 @@ const getContactById = async (contactId) => {
 
 const removeContact = async (contactId) => {
   try {
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const deletedContactIndex = contacts.findIndex(
-      ({ id }) => id === Number(contactId)
-    )
-    if (deletedContactIndex === -1) {
-      return false
-    }
-    contacts.splice(deletedContactIndex, 1)
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
+    const { Contacts } = await getCollections()
+    await Contacts.deleteOne({
+      _id: new ObjectId(contactId)
+    })
     return true
   } catch (error) {
     console.error(error)
@@ -52,15 +42,8 @@ const removeContact = async (contactId) => {
 const addContact = async (body) => {
   try {
     const { name, email, phone } = body
-    const date = new Date()
-    const id = date.getTime()
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const contact = { id, name, email, phone }
-    contacts.push(contact)
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
-    return contact
+    const { Contacts } = await getCollections()
+    await Contacts.insertOne({ name, email, phone })
   } catch (error) {
     console.error(error)
   }
@@ -68,32 +51,45 @@ const addContact = async (body) => {
 
 const updateContact = async (contactId, body) => {
   try {
-    const updatedContactId = Number(contactId)
-    const { name, email, phone } = body
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const [updatedContact] = contacts.filter(
-      ({ id }) => id === updatedContactId
+    // console.log('Inside updateContact')
+    // const updatedContactId = Number(contactId)
+    // const { name, email, phone } = body
+    // const data = await fs.readFile(contactsPath, 'utf8')
+    // const contacts = JSON.parse(data)
+    // const [updatedContact] = contacts.filter(
+    //   ({ id }) => id === updatedContactId
+    // )
+    // if (!updatedContact) {
+    //   return false
+    // }
+    const { Contacts } = await getCollections()
+    await Contacts.updateOne(
+      {
+        _id: new ObjectId(contactId)
+      },
+      { $set: { ...body } }
     )
-    if (!updatedContact) {
-      return false
-    }
-    contacts.forEach((contact) => {
-      if (contact.id === updatedContactId) {
-        if (name) {
-          contact.name = name
-        }
-        if (email) {
-          contact.email = email
-        }
-        if (phone) {
-          contact.phone = phone
-        }
-      }
-    })
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
-    return updatedContact
+    // console.log('contact', contact)
+    // if (!contact.acknowledged) {
+    //   return false
+    // }
+
+    // contacts.forEach((contact) => {
+    //   if (contact.id === updatedContactId) {
+    //     if (name) {
+    //       contact.name = name
+    //     }
+    //     if (email) {
+    //       contact.email = email
+    //     }
+    //     if (phone) {
+    //       contact.phone = phone
+    //     }
+    //   }
+    // })
+    // const stringifyContacts = JSON.stringify(contacts)
+    // await fs.writeFile(contactsPath, stringifyContacts)
+    return true
   } catch (error) {
     console.error(error)
   }
