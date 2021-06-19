@@ -1,20 +1,16 @@
-const MongoClient = require('mongodb').MongoClient
-const collections = {}
+const mongoose = require('mongoose')
 
-const getCollections = () => {
-  return collections
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  dbName: 'db-contacts'
 }
 
 const connectMongo = async () => {
   try {
-    const client = await MongoClient.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    const db = client.db('db-contacts')
-
-    collections.Contacts = db.collection('contacts')
+    const mongooseDb = mongoose.connect(process.env.MONGO_URL, options)
     console.log('Database connection successful')
+    return mongooseDb
   } catch (err) {
     console.error(
       `Failed to connect to data  base with error: "${err.message}"`
@@ -22,4 +18,4 @@ const connectMongo = async () => {
   }
 }
 
-module.exports = { connectMongo, getCollections }
+module.exports = { connectMongo }
