@@ -21,6 +21,10 @@ router.post('/', addContactValidation, asyncWrapper(addContact))
 
 router.delete('/:contactId', asyncWrapper(deleteContactById))
 
-router.put('/:contactId', patchContactValidation, asyncWrapper(updateContactById))
+router.put(
+  '/:contactId',
+  patchContactValidation,
+  asyncWrapper(updateContactById)
+)
 
 module.exports = router
