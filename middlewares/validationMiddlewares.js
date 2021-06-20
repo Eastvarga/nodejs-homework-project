@@ -33,5 +33,15 @@ module.exports = {
       next(new ValidationError(validationResult.error.message))
     }
     next()
+  },
+  favoriteContactValidation: (req, res, next) => {
+    const schema = Joi.object({
+      favorite: Joi.boolean().required()
+    })
+    const validationResult = schema.validate(req.body)
+    if (validationResult.error) {
+      next(new ValidationError('missing field favorite'))
+    }
+    next()
   }
 }
