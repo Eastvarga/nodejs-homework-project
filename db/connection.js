@@ -8,13 +8,16 @@ const options = {
 
 const connectMongo = async () => {
   try {
-    const mongooseDb = mongoose.connect(process.env.MONGO_URL, options)
-    console.log('Database connection successful')
+    const mongooseDb = await mongoose.connect(process.env.MONGO_URL, options)
+    if (mongooseDb) {
+      console.log('Database connection successful')
+    }
     return mongooseDb
   } catch (err) {
     console.error(
       `Failed to connect to data  base with error: "${err.message}"`
     )
+    process.exit(1)
   }
 }
 
