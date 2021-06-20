@@ -1,14 +1,15 @@
 const {
-  getContacts,
+  listContacts,
   getContactById,
   addContact,
-  changeContactById,
-  deleteContactById
-} = require('../services/contactsServices')
+  updateContact,
+  removeContact,
+  updateStatusContact
+} = require('../model')
 
 module.exports = {
   getContactsListController: async (req, res, next) => {
-    const contacts = await getContacts()
+    const contacts = await listContacts()
     res.json({ contacts })
   },
   getContactByIdController: async (req, res, next) => {
@@ -23,15 +24,22 @@ module.exports = {
   },
   deleteContactByIdController: async (req, res, next) => {
     const { contactId } = req.params
-    await deleteContactById(contactId)
+    await removeContact(contactId)
     res.status(200).json({ message: 'contact deleted' })
   },
   updateContactByIdController: async (req, res, next) => {
     const { contactId } = req.params
     const body = req.body
-    await changeContactById({ contactId, body })
+    await updateContact({ contactId, body })
     res.status(200).json({
       message: `Contact with id: ${contactId} updated`
     })
+  },
+  updateStatusContactController: async (req, res, next) => {
+    const { contactId } = req.params
+
+    const body = req.body
+    const contact = await updateStatusContact({ contactId, body })
+    res.status(200).json({ contact })
   }
 }
