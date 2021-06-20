@@ -5,11 +5,13 @@ const {
   getContactByIdController,
   addContactController,
   deleteContactByIdController,
-  updateContactByIdController
+  updateContactByIdController,
+  updateStatusContactController
 } = require('../../conrollers/contactsControllers')
 const {
   addContactValidation,
-  changeContactValidation
+  changeContactValidation,
+  favoriteContactValidation
 } = require('../../middlewares/validationMiddlewares')
 const { asyncWrapper } = require('../../helpers/apiHelpers')
 
@@ -25,6 +27,11 @@ router.put(
   '/:contactId',
   changeContactValidation,
   asyncWrapper(updateContactByIdController)
+)
+router.patch(
+  '/:contactId/favorite',
+  favoriteContactValidation,
+  asyncWrapper(updateStatusContactController)
 )
 
 module.exports = router
