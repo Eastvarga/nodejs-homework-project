@@ -1,104 +1,48 @@
-const path = require('path')
-const fs = require('fs/promises')
-const contactsPath = path.resolve('./model/contacts.json')
+const { Contact } = require('../db/contactModel')
+const { EmptyParametersError } = require('../helpers/errors')
 
 const listContacts = async () => {
-  try {
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    return contacts
-  } catch (error) {
-    console.error(error)
-  }
+  const contacts = await Contact.find({})
+  return contacts
 }
-
 const getContactById = async (contactId) => {
-  try {
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const contact = contacts.find((elem) => elem.id === Number(contactId))
-    if (!contact) {
-      return false
-    }
-    return contact
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const removeContact = async (contactId) => {
-  try {
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const deletedContactIndex = contacts.findIndex(
-      ({ id }) => id === Number(contactId)
+  const contact = await Contact.findById(contactId)
+  if (!contact) {
+    throw new EmptyParametersError(
+      `The contact with id: ${contactId} do not exist`
     )
-    if (deletedContactIndex === -1) {
-      return false
-    }
-    contacts.splice(deletedContactIndex, 1)
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
-    return true
-  } catch (error) {
-    console.error(error)
   }
+  return contact
 }
-
 const addContact = async (body) => {
-  try {
-    const { name, email, phone } = body
-    const date = new Date()
-    const id = date.getTime()
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const contact = { id, name, email, phone }
-    contacts.push(contact)
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
-    return contact
-  } catch (error) {
-    console.error(error)
-  }
+  const contact = new Contact({ ...body })
+  await contact.save()
 }
-
-const updateContact = async (contactId, body) => {
-  try {
-    const updatedContactId = Number(contactId)
-    const { name, email, phone } = body
-    const data = await fs.readFile(contactsPath, 'utf8')
-    const contacts = JSON.parse(data)
-    const [updatedContact] = contacts.filter(
-      ({ id }) => id === updatedContactId
+const updateContact = async ({ contactId, body }) => {
+  await Contact.findByIdAndUpdate(contactId, { $set: { ...body } })
+}
+const removeContact = async (contactId) => {
+  await Contact.findByIdAndRemove(contactId)
+}
+const updateStatusContact = async ({ contactId, body }) => {
+  const { favorite } = body
+  const contact = await Contact.findByIdAndUpdate(
+    contactId,
+    { $set: { favorite } },
+    { new: true }
+  )
+  if (!contact) {
+    throw new EmptyParametersError(
+      `The contact with id: ${contactId} do not exist`
     )
-    if (!updatedContact) {
-      return false
-    }
-    contacts.forEach((contact) => {
-      if (contact.id === updatedContactId) {
-        if (name) {
-          contact.name = name
-        }
-        if (email) {
-          contact.email = email
-        }
-        if (phone) {
-          contact.phone = phone
-        }
-      }
-    })
-    const stringifyContacts = JSON.stringify(contacts)
-    await fs.writeFile(contactsPath, stringifyContacts)
-    return updatedContact
-  } catch (error) {
-    console.error(error)
   }
+  return contact
 }
-
 module.exports = {
   listContacts,
   getContactById,
-  removeContact,
   addContact,
-  updateContact
+  updateContact,
+  removeContact,
+  updateStatusContact
 }
