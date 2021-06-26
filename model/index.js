@@ -1,12 +1,12 @@
 const { Contact } = require('../db/contactModel')
 const { EmptyParametersError } = require('../helpers/errors')
 
-const listContacts = async () => {
-  const contacts = await Contact.find({})
+const listContacts = async (owner) => {
+  const contacts = await Contact.find({ owner })
   return contacts
 }
-const getContactById = async (contactId) => {
-  const contact = await Contact.findById(contactId)
+const getContactById = async ({ id, contactId }) => {
+  const contact = await Contact.findOne({ _id: contactId, owner: id })
   if (!contact) {
     throw new EmptyParametersError(
       `The contact with id: ${contactId} do not exist`
@@ -14,20 +14,24 @@ const getContactById = async (contactId) => {
   }
   return contact
 }
-const addContact = async (body) => {
-  const contact = new Contact({ ...body })
+const addContact = async ({ id, body }) => {
+  // console.log('id', id)
+  const contact = new Contact({ ...body, owner: id })
   await contact.save()
 }
-const updateContact = async ({ contactId, body }) => {
-  await Contact.findByIdAndUpdate(contactId, { $set: { ...body } })
+const updateContact = async ({ contactId, id, body }) => {
+  await Contact.findOneAndUpdate(
+    { _id: contactId, owner: id },
+    { $set: { ...body } }
+  )
 }
-const removeContact = async (contactId) => {
-  await Contact.findByIdAndRemove(contactId)
+const removeContact = async ({ id, contactId }) => {
+  await Contact.findOneAndRemove({ _id: contactId, owner: id })
 }
-const updateStatusContact = async ({ contactId, body }) => {
+const updateStatusContact = async ({ id, contactId, body }) => {
   const { favorite } = body
-  const contact = await Contact.findByIdAndUpdate(
-    contactId,
+  const contact = await Contact.findOneAndUpdate(
+    { _id: contactId, owner: id },
     { $set: { favorite } },
     { new: true }
   )
