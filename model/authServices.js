@@ -2,9 +2,11 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { User } = require('../db/userModel')
 const {
+  EmptyParametersError,
   RegistrationConflictError,
   NotAuthanticateError
 } = require('../helpers/errors')
+const select = 'email subscription -_id'
 
 const registration = async ({ email, password }) => {
   const existEmail = await User.findOne({ email })
@@ -55,17 +57,36 @@ const logout = async ({ id, token }) => {
 }
 
 const getCurrentUser = async ({ id, token }) => {
-  const currentUser = await User.findOne({ _id: id, token })
+  const currentUser = await User.findOne({ _id: id, token }, select)
   if (!currentUser) {
     throw new NotAuthanticateError('Not authorized')
   }
-  const { email, subscription } = currentUser
-  return { email, subscription }
+  // const { email, subscription } = currentUser
+  return currentUser
 }
 
+const updateCurrentUserSubscription = async ({ id, token, body }) => {
+  const { subscription } = body
+  if (!subscription) {
+    throw new EmptyParametersError('subscription not defined')
+  }
+  const updatedSubscriptionCurrentUser = await User.findOneAndUpdate(
+    { _id: id, token },
+    { $set: { subscription } },
+    {
+      new: true,
+      projection: select
+    }
+  )
+  if (!updatedSubscriptionCurrentUser) {
+    throw new NotAuthanticateError('Not authorized')
+  }
+  return updatedSubscriptionCurrentUser
+}
 module.exports = {
   registration,
   login,
   logout,
-  getCurrentUser
+  getCurrentUser,
+  updateCurrentUserSubscription
 }
