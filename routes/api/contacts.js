@@ -15,6 +15,10 @@ const {
 } = require('../../middlewares/validationMiddlewares')
 const { asyncWrapper } = require('../../helpers/apiHelpers')
 
+const { authMiddleware } = require('../../middlewares/authMiddleware')
+
+router.use(authMiddleware)
+
 router.get('/', asyncWrapper(getContactsListController))
 
 router.get('/:contactId', asyncWrapper(getContactByIdController))
