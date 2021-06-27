@@ -58,5 +58,15 @@ module.exports = {
       next(new ValidationError(validationResult.error.message))
     }
     next()
+  },
+  subscriptionValidation: (req, res, next) => {
+    const schema = Joi.object({
+      subscription: Joi.string().valid('starter', 'pro', 'business').required()
+    })
+    const validationResult = schema.validate(req.body)
+    if (validationResult.error) {
+      next(new ValidationError(validationResult.error.message))
+    }
+    next()
   }
 }
