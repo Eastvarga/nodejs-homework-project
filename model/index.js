@@ -36,7 +36,6 @@ const getContactById = async ({ id, contactId }) => {
   return contact
 }
 const addContact = async ({ id, body }) => {
-  // console.log('id', id)
   const contact = new Contact({ ...body, owner: id })
   await contact.save()
 }
