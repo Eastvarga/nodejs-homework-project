@@ -2,7 +2,8 @@ const {
   registration,
   login,
   logout,
-  getCurrentUser
+  getCurrentUser,
+  updateCurrentUserSubscription
 } = require('../model/authServices')
 
 const registrationController = async (req, res) => {
@@ -39,11 +40,24 @@ const getCurrentUserController = async (req, res) => {
     token
   })
 
-  res.json({ ...currentUser })
+  res.json({ user: currentUser })
+}
+const updateCurrentUserSubscriptionController = async (req, res) => {
+  const { id } = req.user
+  const token = req.token
+  const body = req.body
+  const updatedUser = await updateCurrentUserSubscription({
+    id,
+    token,
+    body
+  })
+
+  res.json({ user: updatedUser })
 }
 module.exports = {
   registrationController,
   loginController,
   logoutController,
-  getCurrentUserController
+  getCurrentUserController,
+  updateCurrentUserSubscriptionController
 }
