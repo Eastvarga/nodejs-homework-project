@@ -1,12 +1,33 @@
 const { Contact } = require('../db/contactModel')
 const { EmptyParametersError } = require('../helpers/errors')
 
-const listContacts = async (id) => {
-  const contacts = await Contact.find({ owner: id })
-  return contacts
+const select = '-_id -owner -__v'
+
+const listContacts = async ({ id, query }) => {
+  const { limit = 5, page = 1, sortBy, sortByDesc, favorite } = query
+  const { docs: contacts, totalDocs: total } = await Contact.paginate(
+    {
+      owner: id,
+      ...(favorite ? { favorite: favorite } : {})
+    },
+    {
+      // select,
+      limit,
+      page,
+      sort: {
+        ...(sortBy ? { [`${sortBy}`]: 1 } : {}),
+        ...(sortByDesc ? { [`${sortByDesc}`]: -1 } : {})
+      }
+      // populate: {
+      //   path: 'owner',
+      //   select: 'email subscription -_id'
+      // }
+    }
+  )
+  return { contacts, total, page, limit }
 }
 const getContactById = async ({ id, contactId }) => {
-  const contact = await Contact.findOne({ _id: contactId, owner: id })
+  const contact = await Contact.findOne({ _id: contactId, owner: id }, select)
   if (!contact) {
     throw new EmptyParametersError(
       `The contact with id: ${contactId} do not exist`
@@ -33,7 +54,10 @@ const updateStatusContact = async ({ id, contactId, body }) => {
   const contact = await Contact.findOneAndUpdate(
     { _id: contactId, owner: id },
     { $set: { favorite } },
-    { new: true }
+    {
+      new: true,
+      projection: select
+    }
   )
   if (!contact) {
     throw new EmptyParametersError(
