@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-// const { User } = require('../db/userModel')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const contactShema = new mongoose.Schema({
   name: {
@@ -21,6 +21,7 @@ const contactShema = new mongoose.Schema({
     ref: 'user'
   }
 })
+contactShema.plugin(mongoosePaginate)
 
 const Contact = mongoose.model('Contact', contactShema)
 
