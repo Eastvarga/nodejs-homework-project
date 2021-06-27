@@ -1,17 +1,11 @@
-const {
-  //   ValidationError,
-  //   EmptyParametersError,
-  //   NotAuthorisedError,
-  //   RegistrationConflictError,
-  NotAuthanticateError
-} = require('../helpers/errors')
+const { NotAuthanticateError } = require('../helpers/errors')
 const jwt = require('jsonwebtoken')
 const { User } = require('../db/userModel')
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const [tokenType, token] = req.headers.authorization.split(' ')
-    //   console.log('token', token)
+    const [, token] = req.headers.authorization.split(' ')
+
     if (!token) {
       next(new NotAuthanticateError('Not authorized'))
     }
@@ -26,7 +20,6 @@ const authMiddleware = async (req, res, next) => {
     }
     next()
   } catch (err) {
-    // throw new NotAuthanticateError('Not authorized')
     next(new NotAuthanticateError('Not authorized'))
   }
 }
