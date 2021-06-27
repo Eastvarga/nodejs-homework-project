@@ -18,6 +18,7 @@ const registration = async ({ email, password }) => {
   const newUser = await user.save()
   return { email: newUser.email, subscription: newUser.subscription }
 }
+
 const login = async ({ email, password }) => {
   const user = await User.findOne({ email })
   if (!user) {
@@ -41,6 +42,7 @@ const login = async ({ email, password }) => {
   )
   return updatedUser
 }
+
 const logout = async ({ id, token }) => {
   const updatedUser = await User.findOneAndUpdate(
     { _id: id, token },
@@ -51,6 +53,7 @@ const logout = async ({ id, token }) => {
     throw new NotAuthanticateError('Not authorized')
   }
 }
+
 const getCurrentUser = async ({ id, token }) => {
   const currentUser = await User.findOne({ _id: id, token })
   if (!currentUser) {
@@ -59,6 +62,7 @@ const getCurrentUser = async ({ id, token }) => {
   const { email, subscription } = currentUser
   return { email, subscription }
 }
+
 module.exports = {
   registration,
   login,
