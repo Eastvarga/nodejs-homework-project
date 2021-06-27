@@ -1,0 +1,8 @@
+{
+  "apiLimit": {
+    "windowMs": 900000,
+    "max": 100
+  },
+  "accountRateLimit": { "windowMs": 3600000, "max": 10 },
+  "jsonLimit": 10000
+}
