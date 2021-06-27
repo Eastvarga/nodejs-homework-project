@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+
 async function hashingPassword() {
   if (this.isNew) {
     this.password = await bcrypt.hash(this.password, 10)
