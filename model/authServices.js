@@ -1,13 +1,16 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { User } = require('../db/userModel')
-
 const {
-  //   NotAuthorisedError,
+  RegistrationConflictError,
   NotAuthanticateError
 } = require('../helpers/errors')
 
 const registration = async ({ email, password }) => {
+  const existEmail = await User.findOne({ email })
+  if (existEmail) {
+    throw new RegistrationConflictError('Email in use')
+  }
   const user = new User({
     email,
     password
@@ -31,13 +34,34 @@ const login = async ({ email, password }) => {
     },
     process.env.JWT_SECRET
   )
-  await User.findByIdAndUpdate(user._id, { $set: { token } })
-  return token
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    { $set: { token } },
+    { new: true }
+  )
+  return updatedUser
 }
-const logout = async (id) => {}
-
+const logout = async ({ id, token }) => {
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: id, token },
+    { $set: { token: null } },
+    { new: true }
+  )
+  if (!updatedUser) {
+    throw new NotAuthanticateError('Not authorized')
+  }
+}
+const getCurrentUser = async ({ id, token }) => {
+  const currentUser = await User.findOne({ _id: id, token })
+  if (!currentUser) {
+    throw new NotAuthanticateError('Not authorized')
+  }
+  const { email, subscription } = currentUser
+  return { email, subscription }
+}
 module.exports = {
   registration,
   login,
-  logout
+  logout,
+  getCurrentUser
 }

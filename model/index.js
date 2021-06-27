@@ -1,8 +1,8 @@
 const { Contact } = require('../db/contactModel')
 const { EmptyParametersError } = require('../helpers/errors')
 
-const listContacts = async (owner) => {
-  const contacts = await Contact.find({ owner })
+const listContacts = async (id) => {
+  const contacts = await Contact.find({ owner: id })
   return contacts
 }
 const getContactById = async ({ id, contactId }) => {
@@ -19,7 +19,7 @@ const addContact = async ({ id, body }) => {
   const contact = new Contact({ ...body, owner: id })
   await contact.save()
 }
-const updateContact = async ({ contactId, id, body }) => {
+const updateContact = async ({ id, contactId, body }) => {
   await Contact.findOneAndUpdate(
     { _id: contactId, owner: id },
     { $set: { ...body } }
