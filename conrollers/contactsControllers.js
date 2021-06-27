@@ -10,9 +10,12 @@ const {
 module.exports = {
   getContactsListController: async (req, res, next) => {
     const { id } = req.user
-
-    const contacts = await listContacts(id)
-    res.json({ contacts })
+    const query = req.query
+    const contacts = await listContacts({
+      id,
+      query
+    })
+    res.json({ ...contacts })
   },
   getContactByIdController: async (req, res, next) => {
     const { id } = req.user
