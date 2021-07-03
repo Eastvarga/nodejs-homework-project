@@ -20,7 +20,11 @@ const loginController = async (req, res) => {
   })
   res.status(200).json({
     token: user.token,
-    user: { email: user.email, subscription: user.subscription }
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+      avatarURL: user.avatarURL
+    }
   })
 }
 const logoutController = async (req, res) => {
@@ -60,7 +64,7 @@ const updateCurrentUserAvatarController = async (req, res) => {
   const { id } = req.user
   const token = req.token
   const pathAvatar = req.file.path
-  const avatarURL = await updateAvatar({ id, token, pathAvatar })
+  const { avatarURL } = await updateAvatar({ id, token, pathAvatar })
   res.status(200).json({
     avatarURL
   })
