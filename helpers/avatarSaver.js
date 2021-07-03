@@ -18,8 +18,9 @@ const avatarRenameAndSave = async (pathAvatar) => {
     const newPathWithExt = []
     newPathWithExt.push(uuidv4())
     newPathWithExt.push(pathAvatar.split('.')[1])
-    const avatarURL = path.join(AVATARS_DIR, newPathWithExt.join('.'))
-    await fs.rename(pathAvatar, avatarURL)
+    const avatarURL = '/avatars/' + newPathWithExt.join('.')
+    const avatarPath = path.join(AVATARS_DIR, newPathWithExt.join('.'))
+    await fs.rename(pathAvatar, avatarPath)
     return avatarURL
   }
 }
