@@ -7,7 +7,8 @@ const {
   NotAuthanticateError
 } = require('../helpers/errors')
 const select = 'email subscription -_id'
-
+const selectAvatar = 'avatarURL -_id'
+const { avatarRenameAndSave } = require('../helpers/avatarSaver')
 const registration = async ({ email, password }) => {
   const existEmail = await User.findOne({ email })
   if (existEmail) {
@@ -18,7 +19,11 @@ const registration = async ({ email, password }) => {
     password
   })
   const newUser = await user.save()
-  return { email: newUser.email, subscription: newUser.subscription }
+  return {
+    email: newUser.email,
+    subscription: newUser.subscription,
+    avatarURL: newUser.avatarURL
+  }
 }
 
 const login = async ({ email, password }) => {
@@ -61,7 +66,6 @@ const getCurrentUser = async ({ id, token }) => {
   if (!currentUser) {
     throw new NotAuthanticateError('Not authorized')
   }
-  // const { email, subscription } = currentUser
   return currentUser
 }
 
@@ -83,10 +87,26 @@ const updateCurrentUserSubscription = async ({ id, token, body }) => {
   }
   return updatedSubscriptionCurrentUser
 }
+const updateAvatar = async ({ id, token, pathAvatar }) => {
+  const avatarURL = await avatarRenameAndSave(pathAvatar)
+  const updatedCurrentUserAvatar = await User.findOneAndUpdate(
+    { _id: id, token },
+    { $set: { avatarURL } },
+    {
+      new: true,
+      projection: selectAvatar
+    }
+  )
+  if (!updatedCurrentUserAvatar) {
+    throw new NotAuthanticateError('Not authorized')
+  }
+  return updatedCurrentUserAvatar
+}
 module.exports = {
   registration,
   login,
   logout,
   getCurrentUser,
-  updateCurrentUserSubscription
+  updateCurrentUserSubscription,
+  updateAvatar
 }
