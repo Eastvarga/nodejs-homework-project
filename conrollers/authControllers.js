@@ -3,7 +3,8 @@ const {
   login,
   logout,
   getCurrentUser,
-  updateCurrentUserSubscription
+  updateCurrentUserSubscription,
+  updateAvatar
 } = require('../model/authServices')
 
 const registrationController = async (req, res) => {
@@ -54,10 +55,22 @@ const updateCurrentUserSubscriptionController = async (req, res) => {
 
   res.json({ user: updatedUser })
 }
+
+const updateCurrentUserAvatarController = async (req, res) => {
+  const { id } = req.user
+  const token = req.token
+  const pathAvatar = req.file.path
+  const avatarURL = await updateAvatar({ id, token, pathAvatar })
+  res.status(200).json({
+    avatarURL
+  })
+}
+
 module.exports = {
   registrationController,
   loginController,
   logoutController,
   getCurrentUserController,
-  updateCurrentUserSubscriptionController
+  updateCurrentUserSubscriptionController,
+  updateCurrentUserAvatarController
 }
