@@ -8,7 +8,15 @@ const {
 } = require('../helpers/errors')
 const select = 'email subscription -_id'
 const selectAvatar = 'avatarURL -_id'
-const { avatarRenameAndSave } = require('../helpers/avatarSaver')
+const { avatarRenameAndSave, avatarDelete } = require('../helpers/avatarSaver')
+// const cloudinary = require('cloudinary').v2
+// cloudinary.config({
+//   cloud_name: 'sample',
+//   api_key: '874837483274837',
+//   api_secret: 'a676b67565c6767a6767d6767f676fe1',
+//   secure: true
+// })
+
 const registration = async ({ email, password }) => {
   const existEmail = await User.findOne({ email })
   if (existEmail) {
@@ -88,6 +96,12 @@ const updateCurrentUserSubscription = async ({ id, token, body }) => {
   return updatedSubscriptionCurrentUser
 }
 const updateAvatar = async ({ id, token, pathAvatar }) => {
+  const oldAvatarURL = await User.findOne({ _id: id, token }, selectAvatar)
+  console.log(oldAvatarURL)
+  if (oldAvatarURL.avatarURL) {
+    await avatarDelete(oldAvatarURL.avatarURL)
+  }
+
   const avatarURL = await avatarRenameAndSave(pathAvatar)
   const updatedCurrentUserAvatar = await User.findOneAndUpdate(
     { _id: id, token },
