@@ -5,7 +5,8 @@ const {
   loginController,
   logoutController,
   getCurrentUserController,
-  updateCurrentUserSubscriptionController
+  updateCurrentUserSubscriptionController,
+  updateCurrentUserAvatarController
 } = require('../../conrollers/authControllers')
 const { asyncWrapper } = require('../../helpers/apiHelpers')
 const {
@@ -14,7 +15,7 @@ const {
 } = require('../../middlewares/validationMiddlewares')
 const { createAccountLimiter } = require('../../helpers/rate-limit')
 const { authMiddleware } = require('../../middlewares/authMiddleware')
-
+const { upload } = require('../../helpers/uploads')
 router.post(
   '/signup',
   createAccountLimiter,
@@ -24,6 +25,12 @@ router.post(
 router.post('/login', authorizationValidation, asyncWrapper(loginController))
 router.post('/logout', authMiddleware, asyncWrapper(logoutController))
 router.get('/current', authMiddleware, asyncWrapper(getCurrentUserController))
+router.patch(
+  '/avatars',
+  authMiddleware,
+  upload.single('avatar'),
+  asyncWrapper(updateCurrentUserAvatarController)
+)
 router.patch(
   '/',
   authMiddleware,

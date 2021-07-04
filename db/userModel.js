@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-
+const gravatar = require('gravatar')
 async function hashingPassword() {
   if (this.isNew) {
     this.password = await bcrypt.hash(this.password, 10)
@@ -25,6 +25,12 @@ const userShema = new mongoose.Schema({
   token: {
     type: String,
     default: null
+  },
+  avatarURL: {
+    type: String,
+    default: function () {
+      return gravatar.url(this.email, { s: '250' }, true)
+    }
   }
 })
 

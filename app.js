@@ -1,5 +1,7 @@
 const express = require('express')
 const logger = require('morgan')
+
+const path = require('path')
 const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
@@ -13,10 +15,13 @@ const app = express()
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
+const { uploadRouter } = require('./routes/api/upload')
+
 app.use(helmet())
 app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json({ limit: jsonLimit }))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use(
   '/api/',
   rateLimit({
@@ -31,6 +36,7 @@ app.use(
 )
 app.use('/api/contacts/users', authRouter)
 app.use('/api/contacts', contactsRouter)
+app.use('/', uploadRouter)
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
