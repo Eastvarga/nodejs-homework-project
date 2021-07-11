@@ -15,8 +15,6 @@ const app = express()
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
-const { uploadRouter } = require('./routes/api/upload')
-
 app.use(helmet())
 app.use(logger(formatsLogger))
 app.use(cors())
@@ -36,7 +34,6 @@ app.use(
 )
 app.use('/api/contacts/users', authRouter)
 app.use('/api/contacts', contactsRouter)
-app.use('/', uploadRouter)
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
