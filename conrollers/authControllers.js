@@ -4,7 +4,9 @@ const {
   logout,
   getCurrentUser,
   updateCurrentUserSubscription,
-  updateAvatar
+  updateAvatar,
+  verifyUser,
+  repeateSendingMail,
 } = require('../model/authServices')
 
 const registrationController = async (req, res) => {
@@ -69,6 +71,21 @@ const updateCurrentUserAvatarController = async (req, res) => {
     avatarURL
   })
 }
+const veryfyRegistrationController = async (req, res) => {
+  const { verificationToken } = req.params
+  await verifyUser(verificationToken)
+  res.status(200).json({
+    message: 'Verification successful',
+  })
+}
+const repeatedVeryfyRegistrationController = async (req, res) => {
+  const { email } = req.body
+  await repeateSendingMail({ email })
+
+  res.status(200).json({
+    message: 'Verification email sent',
+  })
+}
 
 module.exports = {
   registrationController,
@@ -76,5 +93,7 @@ module.exports = {
   logoutController,
   getCurrentUserController,
   updateCurrentUserSubscriptionController,
-  updateCurrentUserAvatarController
+  updateCurrentUserAvatarController,
+  veryfyRegistrationController,
+  repeatedVeryfyRegistrationController,
 }
