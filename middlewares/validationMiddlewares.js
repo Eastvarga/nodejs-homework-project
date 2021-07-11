@@ -68,5 +68,22 @@ module.exports = {
       next(new ValidationError(validationResult.error.message))
     }
     next()
+  },
+  repeatedVerifyValidation: (req, res, next) => {
+    const schema = Joi.object({
+      email: Joi.string()
+        .email({
+          minDomainSegments: 2
+        })
+        .required()
+    })
+    const validationResult = schema.validate(req.body)
+    if (validationResult.error) {
+      if (validationResult.error.message === '"email" is required') {
+        next(new ValidationError('missing required field email'))
+      }
+      next(new ValidationError(validationResult.error.message))
+    }
+    next()
   }
 }
