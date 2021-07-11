@@ -35,6 +35,12 @@ class RegistrationConflictError extends noteBookError {
     this.status = 409
   }
 }
+class VerificationUserNotFoundError extends noteBookError {
+  constructor(message) {
+    super(message)
+    this.status = 404
+  }
+}
 
 module.exports = {
   noteBookError,
@@ -42,5 +48,6 @@ module.exports = {
   EmptyParametersError,
   NotAuthorisedError,
   RegistrationConflictError,
-  NotAuthanticateError
+  NotAuthanticateError,
+  VerificationUserNotFoundError,
 }
