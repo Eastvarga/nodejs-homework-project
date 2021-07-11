@@ -31,7 +31,15 @@ const userShema = new mongoose.Schema({
     default: function () {
       return gravatar.url(this.email, { s: '250' }, true)
     }
-  }
+  },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verifyToken: {
+    type: String,
+    required: [true, 'Verify token is required'],
+  },
 })
 
 userShema.pre('save', hashingPassword)

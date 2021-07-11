@@ -30,12 +30,12 @@ const avatarRenameAndSave = async (pathAvatar) => {
 
 const avatarDelete = async (avatarURL) => {
   try {
-    console.log(avatarURL)
+    // console.log(avatarURL)
     const avatarName = avatarURL.split('/')[2]
     const avatarPublicPath = path.join(AVATARS_DIR, avatarName)
     await fs.unlink(avatarPublicPath)
   } catch (err) {
-    console.log(err)
+    // console.log(err)
   }
 }
 module.exports = {
