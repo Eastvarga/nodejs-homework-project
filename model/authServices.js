@@ -1,10 +1,15 @@
+const { v4: uuid4 } = require('uuid')
+const sendEmail = require('../helpers/sendEmail')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { User } = require('../db/userModel')
+
 const {
   EmptyParametersError,
   RegistrationConflictError,
-  NotAuthanticateError
+  NotAuthanticateError,
+  VerificationUserNotFoundError,
+  NotAuthorisedError,
 } = require('../helpers/errors')
 const select = 'email subscription -_id'
 const selectAvatar = 'avatarURL -_id'
@@ -18,13 +23,21 @@ const { avatarRenameAndSave, avatarDelete } = require('../helpers/avatarSaver')
 // })
 
 const registration = async ({ email, password }) => {
+  const verifyToken = uuid4()
+  // send email
+  try {
+    await sendEmail({ verifyToken, email })
+  } catch (err) {
+    throw new VerificationUserNotFoundError('registration not complite')
+  }
   const existEmail = await User.findOne({ email })
   if (existEmail) {
     throw new RegistrationConflictError('Email in use')
   }
   const user = new User({
     email,
-    password
+    password,
+    verifyToken,
   })
   const newUser = await user.save()
   return {
@@ -36,12 +49,12 @@ const registration = async ({ email, password }) => {
 
 const login = async ({ email, password }) => {
   const user = await User.findOne({ email })
-  if (!user) {
+  if (!user || !(await bcrypt.compare(password, user.password)) || !user.verify) {
     throw new NotAuthanticateError('Email or password is wrong')
   }
-  if (!(await bcrypt.compare(password, user.password))) {
-    throw new NotAuthanticateError('Email or password is wrong')
-  }
+  // if (!(await bcrypt.compare(password, user.password))) {
+  //   throw new NotAuthanticateError('Email or password is wrong')
+  // }
   const token = jwt.sign(
     {
       id: user._id,
@@ -97,7 +110,6 @@ const updateCurrentUserSubscription = async ({ id, token, body }) => {
 }
 const updateAvatar = async ({ id, token, pathAvatar }) => {
   const oldAvatarURL = await User.findOne({ _id: id, token }, selectAvatar)
-  console.log(oldAvatarURL)
   if (oldAvatarURL.avatarURL) {
     await avatarDelete(oldAvatarURL.avatarURL)
   }
@@ -116,11 +128,37 @@ const updateAvatar = async ({ id, token, pathAvatar }) => {
   }
   return updatedCurrentUserAvatar
 }
+const verifyUser = async (verifyToken) => {
+  const user = await User.findOne({ verifyToken })
+  if (user) {
+    await user.updateOne({ verify: true, verifyToken: null })
+    return
+  }
+  throw new VerificationUserNotFoundError('User not found')
+}
+
+const repeateSendingMail = async ({ email }) => {
+  const user = await User.findOne({ email })
+  if (user && !user.verify) {
+    try {
+      await sendEmail({ verifyToken: user.verifyToken, email })
+      return
+    } catch (err) {
+      throw new VerificationUserNotFoundError('registration not complite')
+    }
+  }
+  if (user && user.verify) {
+    throw new NotAuthorisedError('Verification has already been passed')
+  }
+  if (!user) { throw new NotAuthorisedError('User not found') }
+}
 module.exports = {
   registration,
   login,
   logout,
   getCurrentUser,
   updateCurrentUserSubscription,
-  updateAvatar
+  updateAvatar,
+  verifyUser,
+  repeateSendingMail,
 }
